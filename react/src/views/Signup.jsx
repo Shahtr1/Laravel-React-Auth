@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import axiosClient from "../axios.client.js";
 import { useStateContext } from "../contexts/ContextProvider.jsx";
 
-export default function () {
+export default function Signup() {
     const nameRef = useRef();
     const emailRef = useRef();
     const passwordRef = useRef();
