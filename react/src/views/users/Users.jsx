@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import axiosClient from "../axios.client.js";
+import axiosClient from "../../axios.client.js";
 import { Link } from "react-router-dom";
-import { useStateContext } from "../contexts/ContextProvider.jsx";
+import { useStateContext } from "../../contexts/ContextProvider.jsx";
+import "./Users.scss";
 
 export default function Users() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const { setNotification } = useStateContext();
+    const { setNotification, can } = useStateContext();
 
     useEffect(() => {
         getUsers();
@@ -19,7 +20,6 @@ export default function Users() {
             .get("/users")
             .then(({ data }) => {
                 setLoading(false);
-                console.log(data);
                 setUsers(data.data);
             })
             .catch(() => {
@@ -48,9 +48,11 @@ export default function Users() {
                 }}
             >
                 <h1>Users</h1>
-                <Link to="/users/new" className="btn-add">
-                    Add new
-                </Link>
+                {can("create users") && (
+                    <Link to="/users/new" className="btn-add">
+                        Add new
+                    </Link>
+                )}
             </div>
             <div className="card animated fadeInDown">
                 <table>
@@ -60,7 +62,9 @@ export default function Users() {
                             <th>Name</th>
                             <th>Email</th>
                             <th>Creation Date</th>
-                            <th>Actions</th>
+                            {(can("update users") || can("delete users")) && (
+                                <th>Actions</th>
+                            )}
                         </tr>
                     </thead>
                     {loading && (
@@ -80,21 +84,31 @@ export default function Users() {
                                     <td>{u.name}</td>
                                     <td>{u.email}</td>
                                     <td>{u.created_at}</td>
-                                    <td>
-                                        <Link
-                                            to={"/users/" + u.id}
-                                            className="btn-edit"
-                                        >
-                                            Edit
-                                        </Link>
-                                        &nbsp;
-                                        <button
-                                            onClick={(ev) => onDelete(u)}
-                                            className="btn-delete"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
+                                    {(can("update users") ||
+                                        can("delete users")) && (
+                                        <td>
+                                            <div className="action-wrapper">
+                                                {can("update users") && (
+                                                    <Link
+                                                        to={"/users/" + u.id}
+                                                        className="btn-edit"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                )}
+                                                {can("delete users") && (
+                                                    <button
+                                                        onClick={(ev) =>
+                                                            onDelete(u)
+                                                        }
+                                                        className="btn-delete"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>

@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import axiosClient from "../axios.client.js";
 
 export default function DefaultLayout() {
-    const { user, token, notification, setUser, setToken } = useStateContext();
+    const { user, token, notification, setUser, setToken, can } =
+        useStateContext();
 
     if (!token) {
         return <Navigate to={"/login"} />;
@@ -21,6 +22,7 @@ export default function DefaultLayout() {
 
     useEffect(() => {
         axiosClient.get("/user").then(({ data }) => {
+            console.log("data", data);
             setUser(data);
         });
     }, []);
@@ -29,7 +31,7 @@ export default function DefaultLayout() {
         <div id="defaultLayout">
             <aside>
                 <Link to="/dashboard">Dashboard</Link>
-                <Link to="/users">Users</Link>
+                {can("read users") && <Link to="/users">Users</Link>}
             </aside>
             <div className="content">
                 <header>

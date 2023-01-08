@@ -14,6 +14,8 @@ export const ContextProvider = ({ children }) => {
     const [notification, _setNotification] = useState("");
     const [token, _setToken] = useState(localStorage.getItem("ACCESS_TOKEN"));
 
+    const can = (permission) =>
+        !!(user.permissions || []).find((perm) => perm === permission);
     const setNotification = (message) => {
         _setNotification(message);
         setTimeout(() => {
@@ -35,6 +37,7 @@ export const ContextProvider = ({ children }) => {
             value={{
                 user,
                 token,
+                can,
                 setUser,
                 setToken,
                 notification,

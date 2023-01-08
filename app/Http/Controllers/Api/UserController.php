@@ -12,13 +12,22 @@ use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
+    private string $unauthorizedText = "Unauthorized, you dont have access";
+
+    public function showLoggedInUser(){
+        return new UserResource(auth()->user());
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return AnonymousResourceCollection
+     * @return AnonymousResourceCollection|Response
      */
     public function index()
     {
+        if(auth()->user()->cannot('read users')){
+            return \response($this->unauthorizedText,403);
+        }
         return UserResource::collection(
             User::query()->orderBy('id','desc')->paginate()
         );
@@ -32,6 +41,9 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
+        if(auth()->user()->cannot('create users')){
+            return \response($this->unauthorizedText,403);
+        }
         $data = $request->validated();
         $data['password'] = bcrypt($data['password']);
         $user = User::create($data);
@@ -41,23 +53,29 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\User  $user
-     * @return UserResource
+     * @param User $user
+     * @return UserResource|Response
      */
     public function show(User $user)
     {
+        if(auth()->user()->cannot('read users')){
+            return \response($this->unauthorizedText,403);
+        }
         return new UserResource($user);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateUserRequest  $request
-     * @param  \App\Models\User  $user
-     * @return UserResource
+     * @param UpdateUserRequest $request
+     * @param User $user
+     * @return UserResource|Response
      */
     public function update(UpdateUserRequest $request, User $user)
     {
+        if(auth()->user()->cannot('update users')){
+            return \response($this->unauthorizedText,403);
+        }
         $data = $request->validated();
         if(isset($data['password'])){
             $data['password'] = bcrypt($data['password']);
@@ -71,11 +89,14 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $user
+     * @param User $user
      * @return Response
      */
     public function destroy(User $user)
     {
+        if(auth()->user()->cannot('delete users')){
+            return \response($this->unauthorizedText,403);
+        }
         $user->delete();
 
         return response("",204);
